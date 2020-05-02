@@ -1,0 +1,8 @@
+NN Resources
+	https://victorzhou.com/series/neural-networks-from-scratch/
+	https://victorzhou.com/blog/keras-neural-network-tutorial/
+	http://www.datastuff.tech/machine-learning/convolutional-neural-networks-an-introduction-tensorflow-eager/
+	https://github.com/keras-team/keras/tree/master/examples
+	https://github.com/harvitronix/neural-network-genetic-algorithm
+
+https://github.com/ArztSamuel/Applying_EANNs
