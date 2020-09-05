@@ -167,7 +167,6 @@ class Game:
                 turn, acceleration = driver.drive(car.sensor_euclidean_distances)
                 car.acceleration += acceleration * dt * 10.0
                 car.steering += turn * dt * 1.5
-                print(car.sensor_euclidean_distances, acceleration, turn)
                 car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
                 car.update(dt)
                 car.update_history()

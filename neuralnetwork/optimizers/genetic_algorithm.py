@@ -21,7 +21,7 @@ class Optimizer():
     def create_population(self, count, random_topology=False):
         pop = []
 
-        if not random_topology:
+        if random_topology:
             network_config = self.get_random_network()
             print("Chosen network configuration: ")
             print("Number of layers: " + str(network_config["nb_layers"]))

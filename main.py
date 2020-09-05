@@ -69,19 +69,12 @@ def print_networks(networks):
 
 
 def start_race():
-    # nn_param_choices = {
-    #     'nb_neurons': [64, 128, 256, 512, 768, 1024],
-    #     'nb_layers': [1, 2, 3, 4],
-    #     'activation': ['relu', 'elu', 'tanh', 'sigmoid'],
-    #     'optimizer': ['rmsprop', 'adam', 'sgd', 'adagrad',
-    #                   'adadelta', 'adamax', 'nadam'],
-    # }
-
     nn_param_choices = {
-        'nb_neurons': [4],
-        'nb_layers': [2],
-        'activation': ['tanh'],
-        'optimizer': ['sgd'],
+        'nb_neurons': [64, 128, 256, 512, 768, 1024],
+        'nb_layers': [1, 2, 3, 4],
+        'activation': ['relu', 'elu', 'tanh', 'sigmoid'],
+        'optimizer': ['rmsprop', 'adam', 'sgd', 'adagrad',
+                      'adadelta', 'adamax', 'nadam'],
     }
 
     config = {
@@ -103,6 +96,7 @@ def start_race():
                  (config['generations'], config['num_drivers']))
 
     generate_drivers(nn_param_choices, config)
+
 
 
 if __name__ == '__main__':
