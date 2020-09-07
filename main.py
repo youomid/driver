@@ -3,12 +3,16 @@ import os
 from neuralnetwork.optimizers.genetic_algorithm import Optimizer
 from board.board import Game
 
-# supress tensorflow print messages
+# suppress tensorflow print messages
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
-def run_race(drivers, num_drivers, time_limit, config):
+def generate_game(drivers, num_drivers, time_limit, config):
     return Game(num_cars=num_drivers, config=config).run_with_neural_networks(drivers, time_limit)
+
+
+def run_race(drivers, num_drivers, time_limit, config):
+    return generate_game(drivers, num_drivers, time_limit, config)
 
 
 def get_average_performance(drivers):
@@ -28,7 +32,7 @@ def generate_drivers(nn_param_choices, config={}):
     # Evolve the generation.
     for i in range(config['generations']):
         logging.warning("***Doing generation %d of %d***" %
-                     (i + 1, config['generations']))
+                        (i + 1, config['generations']))
 
         cars = run_race(networks, config['num_drivers'], config['time_limit'], config)
 
@@ -42,7 +46,7 @@ def generate_drivers(nn_param_choices, config={}):
 
         # Print out the average accuracy each generation.
         logging.warning("Generation average: " + str(average_distance) + "%")
-        logging.warning('-'*80)
+        logging.warning('-' * 80)
 
         # Evolve, except on the last iteration.
         if i != config['generations'] - 1:
@@ -55,15 +59,17 @@ def generate_drivers(nn_param_choices, config={}):
     # Print out the top 5 networks.
     print_networks(networks[:5])
 
+
 def check_for_swerving(cars):
     for car in cars:
-        for c in range(1,len(car.history)):            
+        for c in range(1, len(car.history)):
             # going in opposite direction
-            if (car.history[c] * car.history[c-1]) < 0:
+            if (car.history[c] * car.history[c - 1]) < 0:
                 print('swerving')
 
+
 def print_networks(networks):
-    logging.warning('-'*80)
+    logging.warning('-' * 80)
     for network in networks:
         network.print_network()
 
@@ -89,18 +95,14 @@ def start_race():
         'random_topology': True,
         'mutate_topology': True,
         'mutate_weights': False,
-        'sensor_distance': [(70, 70), (90,35), (110, 0), (90, -35), (70, -70)]
+        'sensor_distance': [(70, 70), (90, 35), (110, 0), (90, -35), (70, -70)]
     }
 
     logging.warning("***Evolving %d generations with population %d***" %
-                 (config['generations'], config['num_drivers']))
+                    (config['generations'], config['num_drivers']))
 
     generate_drivers(nn_param_choices, config)
 
 
-
 if __name__ == '__main__':
     start_race()
-
-
-

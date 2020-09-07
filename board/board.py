@@ -1,5 +1,6 @@
 import os
 import time
+import random
 from math import tan, radians, degrees, copysign, sqrt
 
 from board.car import Car, create_cars
@@ -17,6 +18,7 @@ https://github.com/ArztSamuel/Applying_EANNs
 
 class PadSprite(pygame.sprite.Sprite):
     normal = pygame.image.load('image/vertical_pads.png')
+
     def __init__(self, position):
         super(PadSprite, self).__init__()
         self.rect = pygame.Rect(self.normal.get_rect())
@@ -26,6 +28,7 @@ class PadSprite(pygame.sprite.Sprite):
 
 class HorizontalPad(pygame.sprite.Sprite):
     normal = pygame.image.load('image/race_pads.png')
+
     def __init__(self, position):
         super(HorizontalPad, self).__init__()
         self.rect = pygame.Rect(self.normal.get_rect())
@@ -35,6 +38,7 @@ class HorizontalPad(pygame.sprite.Sprite):
 
 class SmallHorizontalPad(pygame.sprite.Sprite):
     normal = pygame.image.load('image/small_horizontal.png')
+
     def __init__(self, position):
         super(SmallHorizontalPad, self).__init__()
         self.rect = pygame.Rect(self.normal.get_rect())
@@ -44,11 +48,12 @@ class SmallHorizontalPad(pygame.sprite.Sprite):
 
 class SmallVerticalPad(pygame.sprite.Sprite):
     normal = pygame.image.load('image/small_vertical.png')
+
     def __init__(self, position):
         super(SmallVerticalPad, self).__init__()
         self.rect = pygame.Rect(self.normal.get_rect())
         self.rect.center = position
-        self.image = self.normal      
+        self.image = self.normal
 
 
 MAZE_PADS = [
@@ -85,13 +90,10 @@ STRAIGHT_LINE_PADS = [
     HorizontalPad((224, 500)),
 ]
 
-OBSTACLE_PADS = [
-    PadSprite((0, 200)),
-    PadSprite((0, 400)),
-]
 
 class Game:
-    def __init__(self, num_cars=10, name="No Name", height=768, width=1024, config={}):
+    def __init__(self, num_cars=10, name="No Name", height=768,
+                 width=1024, config=None, track="STRAIGHT_LINE"):
         pygame.init()
         pygame.display.set_caption(name)
         self.screen = pygame.display.set_mode((width, height))
@@ -100,26 +102,32 @@ class Game:
         self.exit = False
         self.num_cars = num_cars
         self.pads = []
-        self.config=config
+        self.config = config if config is None else {}
+        self.track = self.choose_random_track() if not track else track
+        self.set_up_pads()
+
+    def set_up_pads(self):
+        if self.track == "STRAIGHT_LINE":
+            self.pads = STRAIGHT_LINE_PADS
+
+    def choose_random_track(self):
+        tracks = ["STRAIGHT_LINE"]
+        self.track = random.choice(tracks)
 
     def draw_sensors(self, cars):
         for car in cars:
             for sensor in car.sensors_coords:
                 pygame.draw.circle(self.screen, (255, 0, 0), sensor, 5)
-                
-        pygame.display.update()
 
+        pygame.display.update()
 
     def draw_obstacles(self, car_group):
         # draw board
         self.screen.fill((0, 0, 0))
 
-        # draw obstacles
-        self.pads = STRAIGHT_LINE_PADS + OBSTACLE_PADS
-
         pad_group = pygame.sprite.RenderPlain(*self.pads)
-        collisions = pygame.sprite.groupcollide(car_group, pad_group, False, False, collided = None)
-        
+        collisions = pygame.sprite.groupcollide(car_group, pad_group, False, False, collided=None)
+
         for car, obstacle in collisions.items():
             car.crash()
 
@@ -128,7 +136,6 @@ class Game:
         car_group.draw(self.screen)
 
         pygame.display.flip()
-
 
     def run_with_neural_networks(self, drivers, time_limit):
         cars = create_cars(self.num_cars, self.config)
@@ -178,16 +185,3 @@ class Game:
         pygame.quit()
 
         return cars
-
-
-if __name__ == '__main__':
-    game = Game()
-    game.run()
-
-
-
-
-
-
-
-
