@@ -56,7 +56,7 @@ class SmallVerticalPad(pygame.sprite.Sprite):
         self.image = self.normal
 
 
-MAZE_PADS = [
+SPIRAL_PADS = [
     PadSprite((0, 200)),
     PadSprite((0, 400)),
     HorizontalPad((60, 0)),
@@ -93,7 +93,7 @@ STRAIGHT_LINE_PADS = [
 
 class Game:
     def __init__(self, num_cars=10, name="No Name", height=768,
-                 width=1024, config=None, track="STRAIGHT_LINE"):
+                 width=1024, config=None, track=None):
         pygame.init()
         pygame.display.set_caption(name)
         self.screen = pygame.display.set_mode((width, height))
@@ -109,10 +109,12 @@ class Game:
     def set_up_pads(self):
         if self.track == "STRAIGHT_LINE":
             self.pads = STRAIGHT_LINE_PADS
+        elif self.track == "SPIRAL":
+            self.pads = SPIRAL_PADS
 
     def choose_random_track(self):
-        tracks = ["STRAIGHT_LINE"]
-        self.track = random.choice(tracks)
+        tracks = ["STRAIGHT_LINE", "SPIRAL"]
+        return random.choice(tracks)
 
     def draw_sensors(self, cars):
         for car in cars:
