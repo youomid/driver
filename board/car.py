@@ -1,5 +1,4 @@
-from math import tan, radians, degrees, copysign
-from pygame.math import Vector2
+from math import tan, radians, degrees
 import math
 import pygame
 from pygame.math import Vector2

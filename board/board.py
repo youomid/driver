@@ -1,11 +1,8 @@
-import os
-import time
 import random
-from math import tan, radians, degrees, copysign, sqrt
 
-from board.car import Car, create_cars
+from board.car import create_cars
 import pygame
-from pygame.math import Vector2
+from board import tracks
 
 """
 
@@ -14,81 +11,6 @@ https://github.com/tdostilio/Race_Game
 https://github.com/ArztSamuel/Applying_EANNs
 
 """
-
-
-class PadSprite(pygame.sprite.Sprite):
-    normal = pygame.image.load('image/vertical_pads.png')
-
-    def __init__(self, position):
-        super(PadSprite, self).__init__()
-        self.rect = pygame.Rect(self.normal.get_rect())
-        self.rect.center = position
-        self.image = self.normal
-
-
-class HorizontalPad(pygame.sprite.Sprite):
-    normal = pygame.image.load('image/race_pads.png')
-
-    def __init__(self, position):
-        super(HorizontalPad, self).__init__()
-        self.rect = pygame.Rect(self.normal.get_rect())
-        self.rect.center = position
-        self.image = self.normal
-
-
-class SmallHorizontalPad(pygame.sprite.Sprite):
-    normal = pygame.image.load('image/small_horizontal.png')
-
-    def __init__(self, position):
-        super(SmallHorizontalPad, self).__init__()
-        self.rect = pygame.Rect(self.normal.get_rect())
-        self.rect.center = position
-        self.image = self.normal
-
-
-class SmallVerticalPad(pygame.sprite.Sprite):
-    normal = pygame.image.load('image/small_vertical.png')
-
-    def __init__(self, position):
-        super(SmallVerticalPad, self).__init__()
-        self.rect = pygame.Rect(self.normal.get_rect())
-        self.rect.center = position
-        self.image = self.normal
-
-
-SPIRAL_PADS = [
-    PadSprite((0, 200)),
-    PadSprite((0, 400)),
-    HorizontalPad((60, 0)),
-    HorizontalPad((300, 0)),
-    HorizontalPad((700, 0)),
-    HorizontalPad((900, 0)),
-    PadSprite((1024, 100)),
-    PadSprite((1024, 550)),
-    HorizontalPad((1024, 768)),
-    HorizontalPad((624, 768)),
-    HorizontalPad((224, 768)),
-    PadSprite((200, 768)),
-    PadSprite((200, 368)),
-    HorizontalPad((450, 130)),
-    HorizontalPad((550, 130)),
-    PadSprite((800, 375)),
-    SmallHorizontalPad((670, 615)),
-    SmallHorizontalPad((470, 615)),
-    SmallVerticalPad((350, 490)),
-    SmallVerticalPad((350, 390)),
-    SmallHorizontalPad((470, 270)),
-    SmallVerticalPad((600, 390))
-]
-
-STRAIGHT_LINE_PADS = [
-    HorizontalPad((1024, 200)),
-    HorizontalPad((624, 200)),
-    HorizontalPad((224, 200)),
-    HorizontalPad((1024, 500)),
-    HorizontalPad((624, 500)),
-    HorizontalPad((224, 500)),
-]
 
 
 class Game:
@@ -107,13 +29,13 @@ class Game:
         self.set_up_pads()
 
     def set_up_pads(self):
-        if self.track == "STRAIGHT_LINE":
-            self.pads = STRAIGHT_LINE_PADS
+        if self.track == "HORIZONTAL":
+            self.pads = tracks.HORIZONTAL_TRACK
         elif self.track == "SPIRAL":
-            self.pads = SPIRAL_PADS
+            self.pads = tracks.SPIRAL_TRACK
 
     def choose_random_track(self):
-        tracks = ["STRAIGHT_LINE", "SPIRAL"]
+        tracks = ["HORIZONTAL", "SPIRAL"]
         return random.choice(tracks)
 
     def draw_sensors(self, cars):
