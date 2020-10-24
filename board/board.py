@@ -15,7 +15,7 @@ https://github.com/ArztSamuel/Applying_EANNs
 
 class Game:
     def __init__(self, num_cars=10, name="No Name", height=768,
-                 width=1024, config=None, track=None):
+                 width=1024, config=None, track='RANDOM'):
         pygame.init()
         pygame.display.set_caption(name)
         self.screen = pygame.display.set_mode((width, height))
@@ -25,7 +25,7 @@ class Game:
         self.num_cars = num_cars
         self.pads = []
         self.config = config if config is None else {}
-        self.track = self.choose_random_track() if not track else track
+        self.track = self.choose_random_track() if track == 'RANDOM' else track
         self.set_up_pads()
 
     def set_up_pads(self):
@@ -60,6 +60,10 @@ class Game:
         car_group.draw(self.screen)
 
         pygame.display.flip()
+
+    @staticmethod
+    def get_car_race_progress(car):
+        return (car.position.x/1024)*100
 
     def run_with_neural_networks(self, drivers, time_limit):
         cars = create_cars(self.num_cars, self.config)
@@ -96,11 +100,16 @@ class Game:
             # update car steering and acceleration
             for car, driver in zip(cars, drivers):
                 turn, acceleration = driver.drive(car.sensor_euclidean_distances)
+                direction = 1 if turn else -1
                 car.acceleration += acceleration * dt * 10.0
-                car.steering += turn * dt * 1.5
+                car.steering += (1 if turn else -1) * dt * 1.5
                 car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
                 car.update(dt)
-                car.update_history()
+                car.update_history(direction)
+                if direction == 1:
+                    car.update_stats('positive_turn_count', car.stats.get('positive_turn_count', 0) + 1)
+                else:
+                    car.update_stats('negative_turn_count', car.stats.get('negative_turn_count', 0) + 1)
                 car.update_sensors_coords(self.pads)
 
             # reset clock timer to count time in between ticks

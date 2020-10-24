@@ -6,7 +6,7 @@ from pygame.math import Vector2
 
 class Car(pygame.sprite.Sprite):
     def __init__(self, x, y, image_path, direction=0.0, length=4, max_steering=5.0, max_acceleration=5.0,
-                 sensor_distance=None):
+                 sensor_distances=None):
         pygame.sprite.Sprite.__init__(self)
         self.starting_position = Vector2(x, y)
         self.position = Vector2(x, y)
@@ -24,19 +24,20 @@ class Car(pygame.sprite.Sprite):
         self.crashed = False
 
         self.sensors_coords = []
-        if sensor_distance is None:
-            sensor_distance = [(70, 70), (90, 35), (110, 0), (90, -35), (70, -70)]
+        if sensor_distances is None:
+            sensor_distances = [(70, 70), (90, 35), (110, 0), (90, -35), (70, -70)]
         # sensor distance from car
-        self.sensor_distance = sensor_distance
-        self.sensor_euclidean_distances = [self.euclidean_distance(s[0], s[1]) for s in sensor_distance]
+        self.sensor_distances = sensor_distances
+        self.sensor_euclidean_distances = [self.euclidean_distance(s[0], s[1]) for s in sensor_distances]
 
         self.create_sensors()
 
         self.history = []
+        self.stats = {}
 
     def create_sensors(self):
         self.sensors_coords = []
-        for sensor_dist in self.sensor_distance:
+        for sensor_dist in self.sensor_distances:
             self.sensors_coords.append((
                 self.position.x + (sensor_dist[0] * math.cos(radians(self.direction)) + sensor_dist[1] * math.sin(
                     radians(self.direction))),
@@ -47,7 +48,7 @@ class Car(pygame.sprite.Sprite):
     def update_sensors_coords(self, obstacles):
         new_sensors = []
         new_sensor_euclidean_distances = []
-        for i, sensor_dist in enumerate(self.sensor_distance):
+        for i, sensor_dist in enumerate(self.sensor_distances):
             new_sensor_coord, sensor_distance = self.calculate_sensor_coords(i, obstacles)
             new_sensors.append(new_sensor_coord)
             new_sensor_euclidean_distances.append(sensor_distance)
@@ -59,10 +60,10 @@ class Car(pygame.sprite.Sprite):
 
     def calculate_sensor_coords(self, sensor_id, obstacles):
         new_sensor_coord = (
-            self.position.x + (self.sensor_distance[sensor_id][0] * math.cos(radians(self.direction)) +
-                               self.sensor_distance[sensor_id][1] * math.sin(radians(self.direction))),
-            self.position.y + (self.sensor_distance[sensor_id][1] * math.cos(radians(self.direction)) -
-                               self.sensor_distance[sensor_id][0] * math.sin(radians(self.direction))),
+            self.position.x + (self.sensor_distances[sensor_id][0] * math.cos(radians(self.direction)) +
+                               self.sensor_distances[sensor_id][1] * math.sin(radians(self.direction))),
+            self.position.y + (self.sensor_distances[sensor_id][1] * math.cos(radians(self.direction)) -
+                               self.sensor_distances[sensor_id][0] * math.sin(radians(self.direction))),
         )
 
         collision_point, collision_distance = self.calculate_collision_point(new_sensor_coord, obstacles)
@@ -121,13 +122,25 @@ class Car(pygame.sprite.Sprite):
 
         return self.position
 
-    def update_history(self):
-        self.history.append(self.steering)
+    def update_history(self, direction):
+        self.history.append({
+            'sensor0': self.sensor_euclidean_distances[0],
+            'sensor1': self.sensor_euclidean_distances[1],
+            'sensor2': self.sensor_euclidean_distances[2],
+            'sensor3': self.sensor_euclidean_distances[3],
+            'sensor4': self.sensor_euclidean_distances[4],
+            'acceleration': self.acceleration,
+            'steering': self.steering,
+            'direction': direction
+        })
+
+    def update_stats(self, key, value):
+        self.stats[key] = value
 
 
 def create_cars(num_cars, config):
     cars = []
     for i in range(num_cars):
-        cars.append(Car(90, 350, "image/car.png", direction=0.0, sensor_distance=config.get('sensor_distance')))
+        cars.append(Car(90, 350, "image/car.png", direction=0.0, sensor_distances=config.get('sensor_distances')))
 
     return cars

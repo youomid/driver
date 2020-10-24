@@ -1,5 +1,7 @@
 import logging
 import os
+import csv
+
 from neuralnetwork.optimizers.genetic_algorithm import Optimizer
 from board.board import Game
 
@@ -8,7 +10,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def generate_game(drivers, num_drivers, time_limit, config):
-    return Game(num_cars=num_drivers, config=config).run_with_neural_networks(drivers, time_limit)
+    return Game(num_cars=num_drivers, config=config, track=config['track']).run_with_neural_networks(drivers, time_limit)
 
 
 def run_race(drivers, num_drivers, time_limit, config):
@@ -24,10 +26,25 @@ def set_networks_performance(drivers, cars):
         driver.accuracy = (car.position.x / 1024) * 100
 
 
+def save_car_history(generation, cars):
+    for i, car in enumerate(cars):
+        column_names = car.history[0].keys()
+        with open(f'data/history/gen{generation}_car{i}.csv', 'w', newline='') as output_file:
+            dict_writer = csv.DictWriter(output_file, column_names)
+            dict_writer.writeheader()
+            dict_writer.writerows(car.history)
+
+
+def print_car_stats(cars):
+    for i, car in enumerate(cars):
+        print(i, car.stats)
+
+
 def generate_drivers(nn_param_choices, config={}):
     optimizer = Optimizer(nn_param_choices, config=config)
     # these are the driver networks
-    networks = optimizer.create_population(config['num_drivers'], random_topology=config['random_topology'])
+    networks = optimizer.create_population(config['num_drivers'], config['network_topology_by_layer'],
+                                           random_topology=config['random_topology'])
 
     # Evolve the generation.
     for i in range(config['generations']):
@@ -36,13 +53,18 @@ def generate_drivers(nn_param_choices, config={}):
 
         cars = run_race(networks, config['num_drivers'], config['time_limit'], config)
 
-        check_for_swerving(cars)
+        save_car_history(i, cars)
+
+        # check_for_swerving(cars)
 
         set_networks_performance(networks, cars)
 
         # this should the be average distance traveled so we can see the
         # improvement from generation to generation
         average_distance = get_average_performance(networks)
+
+        # print the car stats
+        print_car_stats(cars)
 
         # Print out the average accuracy each generation.
         logging.warning("Generation average: " + str(average_distance) + "%")
@@ -79,23 +101,27 @@ def start_race():
         'nb_neurons': [64, 128, 256, 512, 768, 1024],
         'nb_layers': [1, 2, 3, 4],
         'activation': ['relu', 'elu', 'tanh', 'sigmoid'],
-        'optimizer': ['rmsprop', 'adam', 'sgd', 'adagrad',
-                      'adadelta', 'adamax', 'nadam'],
     }
 
     config = {
-        'generations': 1,
-        'num_drivers': 1,
-        'epochs': 1,
+        'generations': 3,
+        'num_drivers': 5,
+        'epochs': 10,
         'output_activation': 'tanh',
         'retain': 0.4,
         'input_shape': (5,),
         'nb_classes': 2,
-        'time_limit': 20,
-        'random_topology': True,
-        'mutate_topology': True,
-        'mutate_weights': False,
-        'sensor_distance': [(70, 70), (90, 35), (110, 0), (90, -35), (70, -70)]
+        'time_limit': 5,
+        'random_topology': False,
+        'mutate_topology': False,
+        'mutate_weights': True,
+        'sensor_distances': [(70, 70), (90, 35), (110, 0), (90, -35), (70, -70)],
+        'track': 'HORIZONTAL',  # SPIRAL, RANDOM, HORIZONTAL
+        'network_topology_by_layer': {
+            'nb_neurons': [5, 4, 2],
+            'nb_layers': 3,
+            'activation': ['relu', 'relu', 'softmax'],
+        }
     }
 
     logging.warning("***Evolving %d generations with population %d***" %
