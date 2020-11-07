@@ -53,7 +53,8 @@ class Optimizer(object):
             network = Network(self.config, self.nn_param_choices)
             network.create_set(child)
 
-            if self.mutate_chance > random.random():
+            # if self.mutate_chance > random.random():
+            if True:
                 if self.config['mutate_topology']:
                     self.mutate_topology(network)
 

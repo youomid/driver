@@ -96,7 +96,7 @@ def print_networks(networks):
         network.print_network()
 
 
-def start_race():
+def start_race(simulate):
     nn_param_choices = {
         'nb_neurons': [64, 128, 256, 512, 768, 1024],
         'nb_layers': [1, 2, 3, 4],
@@ -104,21 +104,21 @@ def start_race():
     }
 
     config = {
-        'generations': 3,
+        'generations': 10,
         'num_drivers': 5,
         'epochs': 10,
         'output_activation': 'tanh',
         'retain': 0.4,
         'input_shape': (5,),
         'nb_classes': 2,
-        'time_limit': 5,
+        'time_limit': 10,
         'random_topology': False,
         'mutate_topology': False,
         'mutate_weights': True,
         'sensor_distances': [(70, 70), (90, 35), (110, 0), (90, -35), (70, -70)],
         'track': 'HORIZONTAL',  # SPIRAL, RANDOM, HORIZONTAL
         'network_topology_by_layer': {
-            'nb_neurons': [5, 4, 2],
+            'nb_neurons': [5, 5, 1],
             'nb_layers': 3,
             'activation': ['relu', 'relu', 'softmax'],
         }

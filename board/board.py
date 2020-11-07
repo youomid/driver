@@ -16,7 +16,7 @@ https://github.com/ArztSamuel/Applying_EANNs
 class Game:
     def __init__(self, num_cars=10, name="No Name", height=768,
                  width=1024, config=None, track='RANDOM'):
-        pygame.init()
+        pygame.display.init()
         pygame.display.set_caption(name)
         self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()
@@ -99,10 +99,10 @@ class Game:
 
             # update car steering and acceleration
             for car, driver in zip(cars, drivers):
-                turn, acceleration = driver.drive(car.sensor_euclidean_distances)
+                turn = driver.drive(car.sensor_euclidean_distances)
                 direction = 1 if turn else -1
-                car.acceleration += acceleration * dt * 10.0
-                car.steering += (1 if turn else -1) * dt * 1.5
+                # car.acceleration += acceleration * dt * 10.0
+                car.steering = (1 if turn else -1) * dt * 5
                 car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
                 car.update(dt)
                 car.update_history(direction)

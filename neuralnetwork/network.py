@@ -13,6 +13,7 @@ class Network(object):
         self.config = config
         self.nb_classes = config['nb_classes']
         self.input_shape = config['input_shape']
+        self.history = []
 
     def create_random(self):
         for key in self.nn_param_choices:
@@ -33,8 +34,8 @@ class Network(object):
     def drive(self, sensors):
         output = self.model.predict(np.array([np.array(sensors)]))
 
-        # set second return value to range 0 through 1
-        return output[0][0], (output[0][1] + 1.0) / 2.0
+        # return new turn value
+        return output[0][0]
 
     def print_network(self):
         logging.warning(self.network)
@@ -67,3 +68,13 @@ class Network(object):
                             weights[i][j][k] = self.get_mutation_amount()
 
         self.model.set_weights(weights)
+
+    def update_history(self, **kwargs):
+        self.history.append({
+            'sensor0': kwargs['distances'][0],
+            'sensor1': kwargs['distances'][1],
+            'sensor2': kwargs['distances'][2],
+            'sensor3': kwargs['distances'][3],
+            'sensor4': kwargs['distances'][4],
+            'turn': kwargs['turn'],
+        })

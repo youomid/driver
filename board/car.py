@@ -10,14 +10,14 @@ class Car(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.starting_position = Vector2(x, y)
         self.position = Vector2(x, y)
-        self.velocity = Vector2(0.0, 0.0)
+        self.velocity = Vector2(50.0, 0.0)
         self.starting_direction = direction
         self.direction = direction
         self.length = length
-        self.max_acceleration = max_acceleration
+        # self.max_acceleration = max_acceleration
         self.max_steering = max_steering
 
-        self.acceleration = 0.0
+        # self.acceleration = 0.0
         self.steering = 0.0
         self.src_image = pygame.image.load(image_path)
 
@@ -94,7 +94,7 @@ class Car(pygame.sprite.Sprite):
         self.crashed = True
 
     def stop(self):
-        self.acceleration = 0
+        # self.acceleration = 0
         self.steering = 0.0
         self.velocity = Vector2(0.0, 0.0)
 
@@ -106,7 +106,7 @@ class Car(pygame.sprite.Sprite):
     def update(self, dt):
 
         if not self.crashed:
-            self.velocity += (self.acceleration * dt, 0)
+            # self.velocity += (self.acceleration * dt, 0)
             if self.steering:
                 turning_radius = self.length / tan(radians(self.steering))
                 angular_velocity = self.velocity.x / turning_radius
@@ -129,7 +129,7 @@ class Car(pygame.sprite.Sprite):
             'sensor2': self.sensor_euclidean_distances[2],
             'sensor3': self.sensor_euclidean_distances[3],
             'sensor4': self.sensor_euclidean_distances[4],
-            'acceleration': self.acceleration,
+            # 'acceleration': self.acceleration,
             'steering': self.steering,
             'direction': direction
         })
