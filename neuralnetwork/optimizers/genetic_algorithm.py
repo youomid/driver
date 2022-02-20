@@ -4,7 +4,7 @@ import random
 from neuralnetwork.network import Network
 
 
-class Optimizer(object):
+class EvolutionaryOptimizer(object):
     def __init__(self, nn_param_choices, config={},
                  random_select=0.1, mutate_chance=0.3):
         self.mutate_chance = mutate_chance
@@ -18,7 +18,7 @@ class Optimizer(object):
             network[key] = random.choice(self.nn_param_choices[key])
         return network
 
-    def create_population(self, count, network, random_topology=False):
+    def create_drivers(self, count, network, random_topology=False):
         population = []
 
         for _ in range(count):

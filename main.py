@@ -2,15 +2,18 @@ import logging
 import os
 import csv
 
-from neuralnetwork.optimizers.genetic_algorithm import Optimizer
+from neuralnetwork.optimizers.genetic_algorithm import EvolutionaryOptimizer
 from board.board import Game
 
 # suppress tensorflow print messages
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+GAME_WINDOW_HEIGHT = 768
+GAME_WINDOW_WIDTH = 1024
+
 
 def generate_game(drivers, num_drivers, time_limit, config):
-    return Game(num_cars=num_drivers, config=config, track=config['track']).run_with_neural_networks(drivers, time_limit)
+    return Game(height=GAME_WINDOW_HEIGHT, width=GAME_WINDOW_WIDTH, num_cars=num_drivers, config=config, track=config['track']).run_with_neural_networks(drivers, time_limit)
 
 
 def run_race(drivers, num_drivers, time_limit, config):
@@ -21,9 +24,10 @@ def get_average_performance(drivers):
     return sum(driver.accuracy for driver in drivers) / len(drivers)
 
 
-def set_networks_performance(drivers, cars):
+def set_drivers_performance(drivers, cars):
+    # TODO: update this to work with different tracks
     for driver, car in zip(drivers, cars):
-        driver.accuracy = (car.position.x / 1024) * 100
+        driver.accuracy = (car.position.x / GAME_WINDOW_WIDTH) * 100
 
 
 def save_car_history(generation, cars):
@@ -41,29 +45,26 @@ def print_car_stats(cars):
 
 
 def generate_drivers(nn_param_choices, config={}):
-    optimizer = Optimizer(nn_param_choices, config=config)
+    optimizer = EvolutionaryOptimizer(nn_param_choices, config=config)
     # these are the driver networks
-    networks = optimizer.create_population(config['num_drivers'], config['network_topology_by_layer'],
+    drivers = optimizer.create_drivers(config['num_drivers'], config['network_topology_by_layer'],
                                            random_topology=config['random_topology'])
 
     # Evolve the generation.
     for i in range(config['generations']):
-        logging.warning("***Doing generation %d of %d***" %
+        logging.warning("***Generation %d of %d***" %
                         (i + 1, config['generations']))
 
-        cars = run_race(networks, config['num_drivers'], config['time_limit'], config)
+        cars = run_race(drivers, config['num_drivers'], config['time_limit'], config)
 
         save_car_history(i, cars)
 
-        # check_for_swerving(cars)
-
-        set_networks_performance(networks, cars)
+        set_drivers_performance(drivers, cars)
 
         # this should the be average distance traveled so we can see the
         # improvement from generation to generation
-        average_distance = get_average_performance(networks)
+        average_distance = get_average_performance(drivers)
 
-        # print the car stats
         print_car_stats(cars)
 
         # Print out the average accuracy each generation.
@@ -73,30 +74,22 @@ def generate_drivers(nn_param_choices, config={}):
         # Evolve, except on the last iteration.
         if i != config['generations'] - 1:
             # Do the evolution.
-            networks = optimizer.evolve(networks)
+            drivers = optimizer.evolve(drivers)
 
-    # Sort our final population.
-    networks = sorted(networks, key=lambda x: x.accuracy, reverse=True)
+    # Sort our final population by performance
+    drivers = sorted(drivers, key=lambda x: x.accuracy, reverse=True)
 
-    # Print out the top 5 networks.
-    print_networks(networks[:5])
-
-
-def check_for_swerving(cars):
-    for car in cars:
-        for c in range(1, len(car.history)):
-            # going in opposite direction
-            if (car.history[c] * car.history[c - 1]) < 0:
-                print('swerving')
+    # Print out the top 5 drivers.
+    print_drivers(drivers[:5])
 
 
-def print_networks(networks):
+def print_drivers(networks):
     logging.warning('-' * 80)
     for network in networks:
         network.print_network()
 
 
-def start_race(simulate):
+def start_race():
     nn_param_choices = {
         'nb_neurons': [64, 128, 256, 512, 768, 1024],
         'nb_layers': [1, 2, 3, 4],
@@ -116,7 +109,7 @@ def start_race(simulate):
         'mutate_topology': False,
         'mutate_weights': True,
         'sensor_distances': [(70, 70), (90, 35), (110, 0), (90, -35), (70, -70)],
-        'track': 'HORIZONTAL',  # SPIRAL, RANDOM, HORIZONTAL
+        'track': 'SPIRAL',  # SPIRAL, RANDOM, HORIZONTAL
         'network_topology_by_layer': {
             'nb_neurons': [5, 5, 1],
             'nb_layers': 3,
