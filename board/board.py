@@ -114,7 +114,7 @@ class Game:
 
             # reset clock timer to count time in between ticks
             self.clock.tick(self.ticks)
-
+            
         pygame.quit()
 
         return cars
